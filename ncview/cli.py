@@ -28,6 +28,14 @@ def build_parser():
     p_summary.add_argument("file", help="Path to NetCDF file")
     p_summary.add_argument("var", nargs="?", help="Variable name (optional, shows all if omitted)")
 
+    # Plotting commands (slower - loads matplotlib/hvplot)
+    p_plot1d = sub.add_parser("plot1d", help="Generate 1D plot at specific time")
+    p_plot1d.add_argument("file", help="Path to NetCDF file")
+    p_plot1d.add_argument("vars", nargs="+", help="Variable name(s) or expression(s) to plot")
+    p_plot1d.add_argument("-t", "--time", required=True, help="Time index (integer) or datetime string")
+    p_plot1d.add_argument("-o", "--output", help="Output file path (PNG, PDF, etc.)")
+    p_plot1d.add_argument("--hvplot", action="store_true", help="Use hvplot instead of matplotlib")
+
     return parser
 
 
@@ -52,6 +60,17 @@ def main(argv=None):
                 _inspect.list_variables(args.file)
             elif args.cmd == "summary":
                 _inspect.summary(args.file, args.var)
+        
+        elif args.cmd == "plot1d":
+            from . import _plot1d
+            
+            _plot1d.plot1d(
+                args.file,
+                args.vars,
+                args.time,
+                args.output,
+                args.hvplot
+            )
                 
         else:
             parser.print_help()

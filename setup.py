@@ -7,7 +7,14 @@ setup(
     description="CLI tool for quick NetCDF file exploration (inspired by pangeo/xarray)",
     author="nramirez-f",
     packages=find_packages(),
-    install_requires=["xarray", "netCDF4", "hvplot", "bokeh"],
+    install_requires=[
+        "xarray",
+        "netCDF4",
+        "matplotlib",
+        "hvplot",
+        "bokeh",
+        "holoviews",
+    ],
     entry_points={
         "console_scripts": [
             "ncv = ncview.cli:main",

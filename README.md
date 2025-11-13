@@ -16,17 +16,31 @@ The CLI is invoked with `ncv` (git-style subcommands):
     - `ncv summary file.nc "h-H"` - summary of the difference between h and H
     - `ncv summary file.nc "temp*2"` - summary of temperature multiplied by 2
     - `ncv summary file.nc "sqrt(u**2 + v**2)"` - summary of velocity magnitude
+
+**Plotting (loads matplotlib/hvplot):**
+- `ncv plot1d <file> <var1> [var2 ...] -t <time> [options]`: generate 1D plot at specific time
+  - Required: `-t/--time`: time index (integer) or datetime string
+  - Optional: `-o/--output`: save to file (PNG, PDF, etc.)
+  - Optional: `--hvplot`: use hvplot instead of matplotlib
+  - Examples:
+    - `ncv plot1d file.nc h -t 0` - plot variable 'h' at time index 0
+    - `ncv plot1d file.nc h H -t "2020-01-01"` - plot h and H at specific date
+    - `ncv plot1d file.nc "h-H" -t 10 -o output.png` - plot difference, save to PNG
+    - `ncv plot1d file.nc "sqrt(u**2+v**2)" -t 0 --hvplot` - plot with hvplot
 ---
 
 ## Installation & Workflow
 
 ### 📦 Dependencies
 
-This project uses the pangeo stack:
+This project uses the pangeo stack and visualization libraries:
 - `xarray`: NetCDF data reading and manipulation
 - `netCDF4`: NetCDF file backend
-- `hvplot`: interactive plotting
-- `bokeh`: visualization backend
+- `matplotlib`: Static plotting (1D plots)
+- `hvplot`: Interactive plotting
+- `bokeh` & `holoviews`: Visualization backends
+
+**All dependencies are installed automatically** when you install NcView with `pip install -e .` or `pipx install .`
 
 ### 🔧 For DEVELOPMENT
 
