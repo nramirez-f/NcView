@@ -37,9 +37,9 @@ def build_parser():
     p_plot1d.add_argument("--hvplot", action="store_true", help="Use hvplot instead of matplotlib")
 
     # Code checking commands
-    p_check_order = sub.add_parser("check_order", help="Check code order from NetCDF input files")
-    p_check_order.add_argument("-samples", nargs="+", required=True, help="Path(s) to sample NetCDF file(s) (last one is used as reference)")
-    p_check_order.add_argument("-vars", nargs="+", required=True, help="Variable name(s) to check")
+    p_scheme_order = sub.add_parser("scheme_order", help="Check numerical scheme order from NetCDF sample files")
+    p_scheme_order.add_argument("-samples", nargs="+", required=True, help="Path(s) to sample NetCDF file(s) (last one is used as reference)")
+    p_scheme_order.add_argument("-vars", nargs="+", required=True, help="Variable name(s) to check")
 
     return parser
 
@@ -77,10 +77,10 @@ def main(argv=None):
                 args.hvplot
             )
         
-        elif args.cmd == "check_order":
-            from . import _check_order
+        elif args.cmd == "scheme_order":
+            from . import _scheme_order
             
-            _check_order.check_order(args.samples, args.vars)
+            _scheme_order.scheme_order(args.samples, args.vars)
                 
         else:
             parser.print_help()

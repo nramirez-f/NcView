@@ -1,6 +1,6 @@
-"""Code order checking utilities for NcView.
+"""Numerical scheme order checking utilities for NcView.
 
-This module handles code order verification from NetCDF input files.
+This module handles numerical scheme order verification from NetCDF sample files.
 """
 import sys
 from pathlib import Path
@@ -24,8 +24,8 @@ def compute_err(u_refp, u, x, norm):
     else:
         raise ValueError(f"Norma desconocida: {norm}")
 
-def check_order(samples, variables):
-    """Check code order from NetCDF sample files.
+def scheme_order(samples, variables):
+    """Check numerical scheme order from NetCDF sample files.
     
     Args:
         samples: List of paths to sample NetCDF files (last one is used as reference)
@@ -50,12 +50,12 @@ def check_order(samples, variables):
     
     vars_ = variables
     
-    print("=== Scheme Order ===")
-    print(f"Checking scheme order from {len(file_paths)} sample file(s):")
+    print("\n=== Scheme Order ===")
+    print(f"\nChecking scheme order from {len(file_paths)} sample file(s):")
     for i, p in enumerate(file_paths):
         marker = " (reference)" if i == len(file_paths) - 1 else ""
         print(f"  - {p}{marker}")
-    print(f"Variables to check: {', '.join(vars_)}")
+    print(f"\nVariables to check: {', '.join(vars_)}")
 
     # Norma: 'L1', 'L2' o 'Linf'
     NORM = 'L1'
@@ -121,7 +121,7 @@ def check_order(samples, variables):
     order_width = max(8, max(len(f"Order({v})") for v in vars_) + 2)
     
     # Build header with dynamic widths
-    header = f"{'ncx':>8}"
+    header = f"{'cells':>8}"
     for v in vars_:
         error_label = f"Error({v})"
         order_label = f"Order({v})"
