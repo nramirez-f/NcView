@@ -16,7 +16,12 @@ setup(
     ],
     entry_points={
         "console_scripts": [
-            "ncv = ncviewer.cli:main",
+            "ncviewer = ncviewer.cli:main",
+            "ncinfo = ncviewer.cli:ncinfo",
+            "ncdim = ncviewer.cli:ncdim",
+            "ncvar = ncviewer.cli:ncvar",
+            "ncsum = ncviewer.cli:ncsum",
+            "ncp1d = ncviewer.cli:ncp1d",
         ],
     },
     include_package_data=True,

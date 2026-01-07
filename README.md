@@ -69,8 +69,8 @@ ncv info myfile.nc
 # 7. To exit the environment
 deactivate
 
-# 8. (Optional) Add alias in bashrc to invoke in any folder
-alias ncv='/path/to/ncviewer/.venv/bin/ncv'
+# 8. (Optional) Add path in bashrc to invoke in any folder
+export PATH='/path/to/ncviewer/.venv/bin:$PATH'
 ```
 ### 🚀 For USAGE (end-user)
 

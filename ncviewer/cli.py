@@ -5,87 +5,119 @@ Each subcommand imports only its required module to minimize startup time.
 """
 import argparse
 import sys
+from . import __version__
 
 
-def build_parser():
-    parser = argparse.ArgumentParser(
-        prog="ncv",
-        description="NetCDF Viewer"
-    )
-    sub = parser.add_subparsers(dest="cmd", required=False)
+# Command definitions (single source of truth)
+COMMANDS = {
+    "ncinfo": {
+        "description": "Display NetCDF file information",
+        "args": [("file", {"help": "Path to NetCDF file"})],
+    },
+    "ncdim": {
+        "description": "Display dimensions and their sizes",
+        "args": [("file", {"help": "Path to NetCDF file"})],
+    },
+    "ncvar": {
+        "description": "List variables with descriptions",
+        "args": [("file", {"help": "Path to NetCDF file"})],
+    },
+    "ncsum": {
+        "description": "Show statistical summary of variable(s)",
+        "args": [
+            ("file", {"help": "Path to NetCDF file"}),
+            ("var", {"nargs": "?", "help": "Variable name (optional, shows all if omitted)"}),
+        ],
+    },
+    "ncp1d": {
+        "description": "Generate 1D plot at specific time",
+        "args": [
+            ("file", {"help": "Path to NetCDF file"}),
+            ("vars", {"nargs": "+", "help": "Variable name(s) or expression(s) to plot"}),
+        ],
+        "optional_args": [
+            (["-t", "--time"], {"required": True, "help": "Time index (integer) or datetime string"}),
+            (["-o", "--output"], {"help": "Output file path (PNG, PDF, etc.)"}),
+            (["--hvplot"], {"action": "store_true", "help": "Use hvplot instead of matplotlib"}),
+        ],
+    },
+}
 
-    # Data inspection commands (fast - only xarray)
-    p_info = sub.add_parser("info", help="Display NetCDF file information")
-    p_info.add_argument("file", help="Path to NetCDF file")
-
-    p_dimensions = sub.add_parser("dimensions", help="Display dimensions and their sizes")
-    p_dimensions.add_argument("file", help="Path to NetCDF file")
-
-    p_variables = sub.add_parser("variables", help="List variables with descriptions")
-    p_variables.add_argument("file", help="Path to NetCDF file")
-
-    p_summary = sub.add_parser("summary", help="Show statistical summary of variable(s)")
-    p_summary.add_argument("file", help="Path to NetCDF file")
-    p_summary.add_argument("var", nargs="?", help="Variable name (optional, shows all if omitted)")
-
-    # Plotting commands (slower - loads matplotlib/hvplot)
-    p_plot1d = sub.add_parser("plot1d", help="Generate 1D plot at specific time")
-    p_plot1d.add_argument("file", help="Path to NetCDF file")
-    p_plot1d.add_argument("vars", nargs="+", help="Variable name(s) or expression(s) to plot")
-    p_plot1d.add_argument("-t", "--time", required=True, help="Time index (integer) or datetime string")
-    p_plot1d.add_argument("-o", "--output", help="Output file path (PNG, PDF, etc.)")
-    p_plot1d.add_argument("--hvplot", action="store_true", help="Use hvplot instead of matplotlib")
-
-    # Code checking commands
-    p_scheme_order = sub.add_parser("scheme_order", help="Check numerical scheme order from NetCDF sample files")
-    p_scheme_order.add_argument("-samples", nargs="+", required=True, help="Path(s) to sample NetCDF file(s) (last one is used as reference)")
-    p_scheme_order.add_argument("-vars", nargs="+", required=True, help="Variable name(s) to check")
-
+def _create_parser(prog, config):
+    """Create parser from command configuration"""
+    parser = argparse.ArgumentParser(prog=prog, description=config["description"])
+    
+    # Add positional/required arguments
+    for arg_name, arg_config in config["args"]:
+        parser.add_argument(arg_name, **arg_config)
+    
+    # Add optional arguments if any
+    for opt_names, opt_config in config.get("optional_args", []):
+        parser.add_argument(*opt_names, **opt_config)
+    
     return parser
 
 
-def main(argv=None):
-    argv = argv or sys.argv[1:]
-    parser = build_parser()
-    args = parser.parse_args(argv)
-
-    if not args or not getattr(args, "cmd", None):
-        parser.print_help()
+def ncinfo():
+    """Entry point for ncinfo command"""
+    parser = _create_parser("ncinfo", COMMANDS["ncinfo"])
+    args = parser.parse_args()
+    
+    try:
+        from . import _inspect
+        _inspect.print_info(args.file)
+        return 0
+    except FileNotFoundError as e:
+        print(f"✗ Error: {e}", file=sys.stderr)
+        return 2
+    except Exception as e:
+        print(f"✗ Unexpected error: {e}", file=sys.stderr)
         return 1
 
+
+def ncdim():
+    """Entry point for ncdim command"""
+    parser = _create_parser("ncdim", COMMANDS["ncdim"])
+    args = parser.parse_args()
+    
     try:
-        if args.cmd in ("info", "dimensions", "variables", "summary"):
-            from . import _inspect
-            
-            if args.cmd == "info":
-                _inspect.print_info(args.file)
-            elif args.cmd == "dimensions":
-                _inspect.dimensions(args.file)
-            elif args.cmd == "variables":
-                _inspect.list_variables(args.file)
-            elif args.cmd == "summary":
-                _inspect.summary(args.file, args.var)
-        
-        elif args.cmd == "plot1d":
-            from . import _plot1d
-            
-            _plot1d.plot1d(
-                args.file,
-                args.vars,
-                args.time,
-                args.output,
-                args.hvplot
-            )
-        
-        elif args.cmd == "scheme_order":
-            from . import _scheme_order
-            
-            _scheme_order.scheme_order(args.samples, args.vars)
-                
-        else:
-            parser.print_help()
-            return 1
-            
+        from . import _inspect
+        _inspect.dimensions(args.file)
+        return 0
+    except FileNotFoundError as e:
+        print(f"✗ Error: {e}", file=sys.stderr)
+        return 2
+    except Exception as e:
+        print(f"✗ Unexpected error: {e}", file=sys.stderr)
+        return 1
+
+
+def ncvar():
+    """Entry point for ncvar command"""
+    parser = _create_parser("ncvar", COMMANDS["ncvar"])
+    args = parser.parse_args()
+    
+    try:
+        from . import _inspect
+        _inspect.list_variables(args.file)
+        return 0
+    except FileNotFoundError as e:
+        print(f"✗ Error: {e}", file=sys.stderr)
+        return 2
+    except Exception as e:
+        print(f"✗ Unexpected error: {e}", file=sys.stderr)
+        return 1
+
+
+def ncsum():
+    """Entry point for ncsum command"""
+    parser = _create_parser("ncsum", COMMANDS["ncsum"])
+    args = parser.parse_args()
+    
+    try:
+        from . import _inspect
+        _inspect.summary(args.file, args.var)
+        return 0
     except FileNotFoundError as e:
         print(f"✗ Error: {e}", file=sys.stderr)
         return 2
@@ -96,8 +128,57 @@ def main(argv=None):
         print(f"✗ Unexpected error: {e}", file=sys.stderr)
         return 1
 
-    return 0
 
+def ncp1d():
+    """Entry point for ncp1d command"""
+    parser = _create_parser("ncp1d", COMMANDS["ncp1d"])
+    args = parser.parse_args()
+    
+    try:
+        from . import _plot1d
+        _plot1d.plot1d(args.file, args.vars, args.time, args.output, args.hvplot)
+        return 0
+    except FileNotFoundError as e:
+        print(f"✗ Error: {e}", file=sys.stderr)
+        return 2
+    except Exception as e:
+        print(f"✗ Unexpected error: {e}", file=sys.stderr)
+        return 1
+    
+def main(argv=None):
+    """Main entry point for ncviewer command"""
+    argv = argv or sys.argv[1:]
+    parser = argparse.ArgumentParser(
+        prog="ncviewer",
+        description="NetCDF Viewer - Quick NetCDF file exploration tool"
+    )
+    sub = parser.add_subparsers(dest="cmd", required=False)
+
+    sub.add_parser("commands", help="List all available commands")
+    args = parser.parse_args(argv)
+
+    if not args or not getattr(args, "cmd", None):
+        print(80*"═")
+        print(f"NetCDF Viewer v{__version__}".center(80))
+        print(80*"═")
+        print()
+        print("Quick NetCDF file exploration tool inspired by pangeo")
+        print()
+        print("Run 'ncviewer commands' to list all available commands.")
+        return 0
+
+    if args.cmd == "commands":
+        print("Available commands (alphabetical order):\n")
+        for cmd in sorted(COMMANDS.keys()):
+            desc = COMMANDS[cmd]["description"]
+            print(f"  {cmd:<12} - {desc}")
+        print()
+        print("Run any command with --help for detailed usage")
+        return 0
+
+    # Should not reach here
+    parser.print_help()
+    return 1
 
 if __name__ == "__main__":
     raise SystemExit(main())
