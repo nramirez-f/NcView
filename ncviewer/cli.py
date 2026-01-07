@@ -1,4 +1,4 @@
-"""Command line interface for NcView
+"""Command line interface for ncviewer
 
 Main CLI entry point with lazy module imports.
 Each subcommand imports only its required module to minimize startup time.

@@ -1,4 +1,4 @@
-"""Common utilities for NcView modules.
+"""Common utilities for ncviewer modules.
 
 Shared functionality used by both _inspect.py and _plot.py.
 Only imports lightweight dependencies (pathlib, xarray).

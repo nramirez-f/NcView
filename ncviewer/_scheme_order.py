@@ -1,4 +1,4 @@
-"""Numerical scheme order checking utilities for NcView.
+"""Numerical scheme order checking utilities for ncviewer.
 
 This module handles numerical scheme order verification from NetCDF sample files.
 """

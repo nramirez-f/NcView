@@ -1,4 +1,4 @@
-"""1D plotting utilities for NcView.
+"""1D plotting utilities for ncviewer.
 
 This module handles 1D plotting operations using matplotlib and hvplot.
 Allows plotting variables or expressions at specific time steps.

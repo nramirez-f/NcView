@@ -1,4 +1,4 @@
-"""Data inspection utilities for NcView.
+"""Data inspection utilities for ncviewer.
 
 This module handles read-only operations on NetCDF files.
 Only imports xarray/netCDF4 (lightweight, fast startup).

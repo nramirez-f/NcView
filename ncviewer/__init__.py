@@ -1,4 +1,4 @@
-"""NcView package
+"""ncviewer package
 
 Lightweight CLI tools for exploring NetCDF files using xarray / pangeo stack.
 """

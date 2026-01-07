@@ -1,8 +1,7 @@
 from setuptools import setup, find_packages
 
-
 setup(
-    name="NcView",
+    name="ncviewer",
     version="0.1.0",
     description="CLI tool for quick NetCDF file exploration (inspired by pangeo/xarray)",
     author="nramirez-f",
@@ -17,7 +16,7 @@ setup(
     ],
     entry_points={
         "console_scripts": [
-            "ncv = ncview.cli:main",
+            "ncv = ncviewer.cli:main",
         ],
     },
     include_package_data=True,

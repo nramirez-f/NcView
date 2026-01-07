@@ -1,4 +1,4 @@
-"""Math Utilities for NcView
+"""Math Utilities for ncviewer
 
 """
 

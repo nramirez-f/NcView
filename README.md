@@ -40,26 +40,26 @@ This project uses the pangeo stack and visualization libraries:
 - `hvplot`: Interactive plotting
 - `bokeh` & `holoviews`: Visualization backends
 
-**All dependencies are installed automatically** when you install NcView with `pip install -e .` or `pipx install .`
+**All dependencies are installed automatically** when you install ncviewer with `pip install -e .` or `pipx install .`
 
 ### 🔧 For DEVELOPMENT
 
 If you're going to modify the CLI code, use a virtual environment:
 
 ```bash
-# 1. Navigate to the project
-cd /path/to/ncview
+# 1. Clone the repository
+git clone git@github.com:nramirez-f/ncviewer.git
 
-# 2. Create virtual environment
+# 2. Navigate to the project
+cd /path/to/ncviewer
+
+# 3. Create virtual environment
 python3 -m venv .venv
 
-# 3. Activate the environment
+# 4. Activate the environment
 source .venv/bin/activate
 
-# 4. Upgrade pip
-pip install --upgrade pip
-
-# 5. Install in editable mode (code changes reflect immediately)
+# 5. Install in editable mode
 pip install -e .
 
 # 6. Now you can use ncv (inside the venv)
@@ -68,40 +68,15 @@ ncv info myfile.nc
 
 # 7. To exit the environment
 deactivate
+
+# 8. (Optional) Add alias in bashrc to invoke in any folder
+alias ncv='/path/to/ncviewer/.venv/bin/ncv'
 ```
-
-**When to use development mode:**
-- ✅ You're modifying code, adding features, debugging
-- ✅ You can install dev tools (pytest, black, flake8, ipython)
-- ✅ Completely isolated from system Python
-
-**Every time you open a new terminal:**
-```bash
-cd /path/to/ncview
-source .venv/bin/activate
-# now ncv is available
-```
-
-**⚠️ Important for editable mode:** If changes don't reflect immediately:
-```bash
-# Option 1: Restart the Python process
-# Just run ncv again in a fresh terminal or after deactivate/activate
-
-# Option 2: Clear Python cache
-find . -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null
-find . -type f -name "*.pyc" -delete
-
-# Option 3: Reinstall (rarely needed)
-pip install -e . --force-reinstall --no-deps
-```
-
 ### 🚀 For USAGE (end-user)
 
 If you just want to use the tool without modifying code:
 
 #### Option A: pipx (global isolated installation) - RECOMMENDED
-
-**⚠️ Common issue on Debian/Ubuntu:** If you get `externally-managed-environment` error:
 
 ```bash
 # Install pipx using system package manager
@@ -111,8 +86,8 @@ sudo apt install pipx
 # Configure PATH (first time only)
 pipx ensurepath
 
-# Close and reopen terminal, then install NcView
-cd /path/to/ncview
+# Close and reopen terminal, then install ncviewer
+cd /path/to/ncviewer
 pipx install .
 
 # Now ncv is globally available
@@ -127,23 +102,7 @@ ncv --help
 
 #### Option B: User virtual environment (without pipx)
 
-If you can't install pipx and want global access:
-
-```bash
-# 1. Create virtual environment in your home
-python3 -m venv ~/.venvs/ncview
-
-# 2. Install NcView in that environment
-~/.venvs/ncview/bin/pip install /path/to/ncview
-
-# 3. Create permanent alias in ~/.bashrc to invoke ncv globally
-echo 'alias ncv="~/.venvs/ncview/bin/ncv"' >> ~/.bashrc
-source ~/.bashrc
-
-# Now ncv works from any directory
-ncv --help
-```
-
+If you can't install pipx and want global access, use development installation without editable mode.
 ---
 
 ## 📖 Quick Usage
