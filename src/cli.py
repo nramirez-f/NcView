@@ -41,6 +41,13 @@ COMMANDS = {
             (["--hvplot"], {"action": "store_true", "help": "Use hvplot instead of matplotlib"}),
         ],
     },
+    "ncplot1d": {
+        "description": "Launch Panel web server for interactive 1D plotting",
+        "args": [],
+        "optional_args": [
+            (["-p", "--port"], {"type": int, "default": 2700, "help": "Port for Panel server (default: 2700)"}),
+        ],
+    },
 }
 
 def _create_parser(prog, config):
@@ -136,7 +143,7 @@ def ncp1d():
     
     try:
         from . import _plot1d
-        _plot1d.plot1d(args.file, args.vars, args.time, args.output, args.hvplot)
+        _p1d.plot1d(args.file, args.vars, args.time, args.output, args.hvplot)
         return 0
     except FileNotFoundError as e:
         print(f"✗ Error: {e}", file=sys.stderr)
@@ -144,7 +151,21 @@ def ncp1d():
     except Exception as e:
         print(f"✗ Unexpected error: {e}", file=sys.stderr)
         return 1
+
+
+def ncplot1d():
+    """Entry point for ncplot1d command - Launch Panel web server"""
+    parser = _create_parser("ncplot1d", COMMANDS["ncplot1d"])
+    args = parser.parse_args()
     
+    try:
+        from . import _plot1d
+        return _plot1d.launch_panel_server(args.port)
+    except Exception as e:
+        print(f"✗ Unexpected error: {e}", file=sys.stderr)
+        return 1
+
+
 def main(argv=None):
     """Main entry point for ncviewer command"""
     argv = argv or sys.argv[1:]
