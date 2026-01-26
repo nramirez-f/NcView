@@ -156,7 +156,12 @@ def summary(path, varname=None):
                 return
         else:
             # Single variable
-            check_variable(ds, varname)
+            if not check_variable(ds, varname):
+                available = ", ".join(list(ds.data_vars)[:5])
+                if len(ds.data_vars) > 5:
+                    available += f", ... ({len(ds.data_vars)} total)"
+                print(f"✗ Error: Variable '{varname}' not found. Available variables: {available}", file=sys.stderr)
+                return
             variables = [(varname, ds[varname])]
     else:
         # All variables

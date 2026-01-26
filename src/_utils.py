@@ -8,7 +8,8 @@ import xarray as xr
 
 
 def open_dataset(path):
-    """Open a NetCDF file and return xarray Dataset.
+    """
+    Open a NetCDF file and return xarray Dataset.
     
     Centralized file opening with validation.
     
@@ -28,20 +29,28 @@ def open_dataset(path):
 
 
 def check_variable(ds, varname):
-    """Check if variable exists in dataset.
+    """
+    Check if variable exists in dataset.
     
     Args:
         ds: xarray.Dataset
         varname: Variable name to validate
         
-    Raises:
-        KeyError: If variable not found in dataset
+    Returns:
+        bool: True if variable exists, False otherwise
     """
-    if varname not in ds.data_vars:
-        available = ", ".join(list(ds.data_vars)[:5])
-        if len(ds.data_vars) > 5:
-            available += f", ... ({len(ds.data_vars)} total)"
-        raise KeyError(
-            f"Variable '{varname}' not found. "
-            f"Available variables: {available}"
-        )
+    return varname in ds.data_vars
+
+
+def check_dimension(ds, dimname):
+    """
+    Check if dimension exists in dataset.
+    
+    Args:
+        ds: xarray.Dataset
+        dimname: Dimension name to validate
+        
+    Returns:
+        bool: True if dimension exists, False otherwise
+    """
+    return dimname in ds.dims

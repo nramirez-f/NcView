@@ -58,6 +58,35 @@ COMMANDS = {
             (["-t", "--time"], {"type": int, "help": "Specific time index to compare (optional)"}),
         ],
     },
+    "ncmov2d": {
+        "description": "Create 2D animations from NetCDF files (MP4/GIF)",
+        "args": [
+            ("file", {"help": "Path to NetCDF file"}),
+            ("variable", {"help": "Variable name to animate"}),
+        ],
+        "optional_args": [
+            (["-o", "--output"], {"help": "Output file path (auto-generated if omitted)"}),
+            (["-f", "--format"], {"choices": ["mp4", "gif"], "default": "mp4", "help": "Output format (default: mp4)"}),
+            (["--time-dim"], {"default": "time", "help": "Name of time dimension (default: time)"}),
+            (["--x-dim"], {"default": "x", "help": "Name of X spatial dimension (default: x)"}),
+            (["--y-dim"], {"default": "y", "help": "Name of Y spatial dimension (default: y)"}),
+            (["--time-start"], {"type": int, "default": 0, "help": "Start time index (default: 0)"}),
+            (["--time-end"], {"type": int, "help": "End time index (default: all)"}),
+            (["--time-step"], {"type": int, "default": 1, "help": "Time step (default: 1)"}),
+            (["--fps"], {"type": int, "default": 10, "help": "Frames per second (default: 10)"}),
+            (["--cmap"], {"default": "viridis", "help": "Matplotlib colormap (default: viridis)"}),
+            (["--levels"], {"type": int, "default": 50, "help": "Number of contour levels (default: 50)"}),
+            (["--vmin"], {"type": float, "help": "Minimum value for colorbar (auto if omitted)"}),
+            (["--vmax"], {"type": float, "help": "Maximum value for colorbar (auto if omitted)"}),
+            (["--fixed-scale"], {"action": "store_true", "help": "Use fixed colorbar scale across all frames"}),
+            (["--no-auto-res"], {"action": "store_true", "help": "Disable automatic resolution adjustment"}),
+            (["--figsize"], {"nargs": 2, "type": float, "metavar": ("WIDTH", "HEIGHT"), "help": "Figure size in inches (default: 10 8)"}),
+            (["--dpi"], {"type": int, "default": 100, "help": "DPI for output (default: 100)"}),
+            (["--title"], {"help": "Custom plot title (default: variable name)"}),
+            (["--no-time"], {"action": "store_true", "help": "Don't show time in title"}),
+            (["--no-colorbar"], {"action": "store_true", "help": "Don't show colorbar"}),
+        ],
+    },
 }
 
 def _create_parser(prog, config):
@@ -189,6 +218,51 @@ def ncplot1d():
     except Exception as e:
         print(f"✗ Unexpected error: {e}", file=sys.stderr)
         return 1
+
+
+def ncmov2d():
+    """Entry point for ncmov2d command - Create 2D animations"""
+    parser = _create_parser("ncmov2d", COMMANDS["ncmov2d"])
+    args = parser.parse_args()
+    
+    try:
+        from . import _mov2d
+        
+        # Handle figsize conversion
+        figsize = tuple(args.figsize) if args.figsize else (10, 8)
+        
+        _mov2d.create_animation(
+            input_file=args.file,
+            variable=args.variable,
+            output_file=args.output,
+            output_format=args.format,
+            time_dim=args.time_dim,
+            x_dim=args.x_dim,
+            y_dim=args.y_dim,
+            time_start=args.time_start,
+            time_end=args.time_end,
+            time_step=args.time_step,
+            fps=args.fps,
+            cmap=args.cmap,
+            levels=args.levels,
+            vmin=args.vmin,
+            vmax=args.vmax,
+            time_dependent_scale=not args.fixed_scale,
+            auto_resolution=not args.no_auto_res,
+            figsize=figsize,
+            dpi=args.dpi,
+            custom_title=args.title,
+            show_time=not args.no_time,
+            show_colorbar=not args.no_colorbar,
+        )
+        return 0
+    except FileNotFoundError as e:
+        print(f"✗ Error: {e}", file=sys.stderr)
+        return 2
+    except Exception as e:
+        print(f"✗ Unexpected error: {e}", file=sys.stderr)
+        return 1
+
 
 def main(argv=None):
     """Main entry point for ncviewer command"""
