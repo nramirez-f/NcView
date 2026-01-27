@@ -53,7 +53,8 @@ def evaluate_expression(ds, expression):
         raise SyntaxError(f"Invalid expression '{expression}': {e}")
 
 def compute_error(var_a, var_b, cell_volume, norm='2'):
-    """Compute error between two variables using specified norm.
+    """
+    Compute error between two variables using specified norm.
     
     Args:
         var_a: First variable (numpy array)

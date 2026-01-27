@@ -349,8 +349,8 @@ def error(path1, path2, time_index=None, norm_error='2'):
             
             print(f"  Total error ({time_dim} summation) = {total_error:.6e}")
             print(f"  Mean error = {mean_error:.6e}")
-            print(f"  Max error = {errors[max_idx]:.6e} at time={max_idx}")
-            print(f"  Min error = {errors[min_idx]:.6e} at time={min_idx}")
+            print(f"  Max error = {errors[max_idx]:.6e} at time={ds1[time_dim].values[max_idx]:.3e}")
+            print(f"  Min error = {errors[min_idx]:.6e} at time={ds1[time_dim].values[min_idx]:.3e}")
             
         elif has_time and time_index is not None:
             if time_index >= var1.sizes[time_dim]:
