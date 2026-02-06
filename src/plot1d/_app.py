@@ -55,7 +55,6 @@ def launch_server(input_file, time_dim='time', x_dim='x'):
     )
 
     dashboard = pn.Row(
-        pn.pane.Markdown('# Line Plot'),
         line_plot_pane,
         align='center',
         sizing_mode='scale_both'
