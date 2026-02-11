@@ -27,7 +27,7 @@ def open_dataset(path):
         raise FileNotFoundError(f"File not found: {path}")
     return xr.open_dataset(p)
 
-def count_spatial_dimensions(path):
+def count_unlimited_dimensions(path):
     """
     Check how many spatial (non-unlimited) dimensions a NetCDF file has.
 
@@ -50,7 +50,7 @@ def count_spatial_dimensions(path):
         ]
     return len(spatial_dims)
 
-def count_temporal_dimensions(path):
+def count_limited_dimensions(path):
     """
     Check how many temporal (unlimited) dimensions a NetCDF file has.
 

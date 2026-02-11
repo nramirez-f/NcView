@@ -24,13 +24,13 @@ def print_info(path):
         path: Path to NetCDF file
     """
     ds = open_dataset(path)
-    print(f"\nInfo of {Path(path).name}")
-    print("=" * 80)
+    print(f"\nInfo of {str(Path(path).resolve())}")
+    print(SEPARATOR_CHAR * SEPARATOR_LENGTH)
     print(ds)
-    print("=" * 80)
+    print(SEPARATOR_CHAR * SEPARATOR_LENGTH)
     ds.close()
 
-def dimensions(path):
+def list_dimensions(path):
     """
     Display dimensions of the NetCDF dataset.
     
@@ -39,10 +39,9 @@ def dimensions(path):
     Args:
         path: Path to NetCDF file
     """
-    from ._utils import count_spatial_dimensions, count_temporal_dimensions
     ds = open_dataset(path)
 
-    print(f"\nDimensions in {Path(path).name}")
+    print(f"\nDimensions in {str(Path(path).resolve())}")
     print(SEPARATOR_CHAR * SEPARATOR_LENGTH)
 
     if not ds.sizes:
@@ -50,74 +49,51 @@ def dimensions(path):
         ds.close()
         return
 
-    # Identificar dimensiones espaciales y temporales
-    spatial_count = count_spatial_dimensions(path)
-    temporal_count = count_temporal_dimensions(path)
-
-    # Determinar nombres de dimensiones espaciales y temporales
-    unlimited_dims = ds.encoding.get('unlimited_dims', [])
-    if not unlimited_dims:
-        unlimited_dims = [
-            dim for dim in ds.dims
-            if getattr(ds.dims[dim], '_is_unlimited_dim', False)
-        ]
-    spatial_dims = [
-        dim for dim in ds.dims
-        if dim not in unlimited_dims
-    ]
+    unlimited_dims = list(ds.encoding.get('unlimited_dims', []))
+    limited_dims = [dim for dim in ds.dims if dim not in unlimited_dims]
 
     print(f"Total: {len(ds.sizes)} dimension(s)")
-    print(f"Temporal dimensions ({temporal_count}): {unlimited_dims}")
-    print(f"Spatial dimensions ({spatial_count}): {spatial_dims}")
+    print(f"Unlimited dimensions ({len(unlimited_dims)}): {unlimited_dims}")
+    print(f"Limited dimensions ({len(limited_dims)}): {limited_dims}")
 
     for dim_name, dim_size in ds.sizes.items():
-        # Check if dimension is unlimited
-        unlimited = ""
-        if dim_name in unlimited_dims:
-            unlimited = " (UNLIMITED)"
-
+        # Details
         print(f"\n{dim_name}:")
-        print(f"  Size: {dim_size}{unlimited}")
+        print(f"  Size: {dim_size}")
 
-        # Check if this dimension has coordinate values
-        if dim_name in ds.coords:
-            coord = ds[dim_name]
-            dtype = str(coord.dtype)
-            print(f"  Type: {dtype}")
+        coord = ds[dim_name]
+        dtype = str(coord.dtype)
+        print(f"  Type: {dtype}")
 
-            # Calculate memory size
-            itemsize = coord.dtype.itemsize
-            total_bytes = dim_size * itemsize
+        # Calculate memory size
+        itemsize = coord.dtype.itemsize
+        total_bytes = dim_size * itemsize
 
-            # Format size in human-readable format
-            if total_bytes < 1024:
-                size_str = f"{total_bytes} B"
-            elif total_bytes < 1024**2:
-                size_str = f"{total_bytes/1024:.2f} KB"
-            elif total_bytes < 1024**3:
-                size_str = f"{total_bytes/1024**2:.2f} MB"
-            else:
-                size_str = f"{total_bytes/1024**3:.2f} GB"
-
-            print(f"  Memory: {size_str}")
-
-            # Try to compute min/max (skip if non-numeric)
-            try:
-                min_val = float(coord.min().values)
-                max_val = float(coord.max().values)
-                print(f"  Range: [{min_val:.4f}, {max_val:.4f}]")
-            except (TypeError, ValueError):
-                print(f"  Range: (Non-numeric)")
+        # Format size in human-readable format
+        if total_bytes < KB_THRESHOLD:
+            size_str = f"{total_bytes} B"
+        elif total_bytes < MB_THRESHOLD:
+            size_str = f"{total_bytes/1024:.2f} KB"
+        elif total_bytes < GB_THRESHOLD:
+            size_str = f"{total_bytes/1024**2:.2f} MB"
         else:
-            print(f"  (No coordinate variable)")
+            size_str = f"{total_bytes/1024**3:.2f} GB"
 
-    print("\n" + SEPARATOR_CHAR * SEPARATOR_LENGTH)
+        print(f"  Memory: {size_str}")
+
+        
+        min_val = float(coord.min().values)
+        max_val = float(coord.max().values)
+        print(f"  Range: [{min_val:.4f}, {max_val:.4f}]")
+        
+    print(SEPARATOR_CHAR * SEPARATOR_LENGTH)
 
     ds.close()
 
 
 def list_variables(path):
-    """List all variables with key metadata and descriptions.
+    """
+    List all variables with key metadata and descriptions.
     
     Shows variable names, dimensions, shapes, types, and descriptions (if available).
     Suggests using 'summary' command for detailed statistics.
@@ -127,7 +103,7 @@ def list_variables(path):
     """
     ds = open_dataset(path)
     
-    print(f"Variables in {Path(path).name}")
+    print(f"\nVariables in {str(Path(path).resolve())}")
     print(SEPARATOR_CHAR * SEPARATOR_LENGTH)
     
     if not ds.data_vars:
@@ -151,12 +127,11 @@ def list_variables(path):
     
     print(SEPARATOR_CHAR * SEPARATOR_LENGTH)
     print(f"Total: {len(ds.data_vars)} variable(s)")
-    print(f"Tip:    Use 'ncv summary {Path(path).name}' for detailed statistics")
-    print(f"        Use 'ncv summary {Path(path).name} <var_name>' for a specific variable")
     ds.close()
 
 def summary(path, varname=None):
-    """Display statistical summary of variable(s) or expressions.
+    """
+    Display statistical summary of variable(s) or expressions.
     
     Args:
         path: Path to NetCDF file
@@ -191,8 +166,8 @@ def summary(path, varname=None):
         # All variables
         variables = [(name, ds[name]) for name in ds.data_vars]
     
-    print(f"Summary for {Path(path).name}:")
-    print("=" * 80)
+    print(f"\nVariables summary for {str(Path(path).resolve())}:")
+    print(SEPARATOR_CHAR * SEPARATOR_LENGTH)
     
     for var_name, var in variables:
         print(f"\nVariable: {var_name}")
@@ -213,11 +188,12 @@ def summary(path, varname=None):
             for attr_name, attr_val in var.attrs.items():
                 print(f"    {attr_name}: {attr_val}")
     
-    print("=" * 80)
+    print(SEPARATOR_CHAR * SEPARATOR_LENGTH)
     ds.close()
 
-def error(path1, path2, time_index=None, norm_error='2'):
-    """Error analysis between two NetCDF files.
+def error(path1, path2, time_index=None, norm_error=DEFAULT_ERROR_NORM):
+    """
+    Error analysis between two NetCDF files.
     
     Args:
         path1: Path to first NetCDF file
@@ -228,7 +204,7 @@ def error(path1, path2, time_index=None, norm_error='2'):
     ds1 = open_dataset(path1)
     ds2 = open_dataset(path2)
     
-    print(f"\nErrors between {Path(path1).name} and {Path(path2).name}")
+    print(f"\nErrors between:\n{str(Path(path1).resolve())} and {str(Path(path2).resolve())}")
     print(SEPARATOR_CHAR * SEPARATOR_LENGTH)
     
     print("checking dimension names...")
@@ -289,7 +265,7 @@ def error(path1, path2, time_index=None, norm_error='2'):
     
     print(f"computing errors for variables {sorted(common_vars)} in norm {norm_error}...")
     print("\nError results:")
-    print("=" * 80)
+    print(SEPARATOR_CHAR * SEPARATOR_LENGTH)
     
     # Detect time dimension
     time_dim = None
@@ -398,7 +374,7 @@ def error(path1, path2, time_index=None, norm_error='2'):
             v2 = var2.values
             err = compute_error(v1, v2, cell_volume, norm=norm_error)
             
-            print(f"  Error (L2 norm): {err:.6e}")
+            print(f"  Error: {err:.6e}")
     
     print("\n" + SEPARATOR_CHAR * SEPARATOR_LENGTH)
     ds1.close()

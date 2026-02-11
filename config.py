@@ -31,8 +31,8 @@ MB_THRESHOLD = 1024**2
 GB_THRESHOLD = 1024**3
 
 # Error computation defaults
-DEFAULT_ERROR_NORM = '2'  # L2 norm by default
-AVAILABLE_NORMS = ['1', '2', 'inf', 'max']
+DEFAULT_ERROR_NORM = '1'
+SUPPORTED_ERROR_NORMS = ['1', '2', 'inf']
 
 # Expression operators (for detecting mathematical expressions)
 EXPRESSION_OPERATORS = ['+', '-', '*', '/', '**', '(', ')']

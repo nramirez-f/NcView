@@ -23,7 +23,7 @@ COMMANDS = {
         "args": [("file", {"help": "Path to NetCDF file"})],
     },
     "ncsum": {
-        "description": "Show statistical summary of variable(s)",
+        "description": "Show statistical summary of variable(s) in the NetCDF file",
         "args": [
             ("file", {"help": "Path to NetCDF file"}),
             ("var", {"nargs": "?", "help": "Variable name (optional, shows all if omitted)"}),
@@ -44,11 +44,11 @@ COMMANDS = {
     "ncerr": {
         "description": "Compute error between two NetCDF files",
         "args": [
-            ("file1", {"help": "Path to NetCDF firstfile"}),
+            ("file1", {"help": "Path to NetCDF first file"}),
             ("file2", {"help": "Path to NetCDF second file"}),
         ],
         "optional_args": [
-            (["-t", "--time"], {"type": int, "help": "Specific time index to compare (optional)"}),
+            (["-t", "--time_index"], {"type": int, "help": "Specific time index to compare"}),
         ],
     },
     "ncmov2d": {
@@ -135,22 +135,6 @@ def ncinfo():
         print(f"✗ Unexpected error: {e}", file=sys.stderr)
         return 1
 
-def ncerr():
-    """Entry point for ncerr command"""
-    parser = _create_parser("ncerr", COMMANDS["ncerr"])
-    args = parser.parse_args()
-    
-    try:
-        from . import _inspect
-        _inspect.error(args.file1, args.file2, time_index=args.time)
-        return 0
-    except FileNotFoundError as e:
-        print(f"✗ Error: {e}", file=sys.stderr)
-        return 2
-    except Exception as e:
-        print(f"✗ Unexpected error: {e}", file=sys.stderr)
-        return 1
-
 def ncdim():
     """Entry point for ncdim command"""
     parser = _create_parser("ncdim", COMMANDS["ncdim"])
@@ -158,7 +142,7 @@ def ncdim():
     
     try:
         from . import _inspect
-        _inspect.dimensions(args.file)
+        _inspect.list_dimensions(args.file)
         return 0
     except FileNotFoundError as e:
         print(f"✗ Error: {e}", file=sys.stderr)
@@ -198,6 +182,22 @@ def ncsum():
         print(f"✗ Error: {e}", file=sys.stderr)
         return 2
     except KeyError as e:
+        print(f"✗ Error: {e}", file=sys.stderr)
+        return 2
+    except Exception as e:
+        print(f"✗ Unexpected error: {e}", file=sys.stderr)
+        return 1
+
+def ncerr():
+    """Entry point for ncerr command"""
+    parser = _create_parser("ncerr", COMMANDS["ncerr"])
+    args = parser.parse_args()
+    
+    try:
+        from . import _inspect
+        _inspect.error(args.file1, args.file2, time_index=args.time_index)
+        return 0
+    except FileNotFoundError as e:
         print(f"✗ Error: {e}", file=sys.stderr)
         return 2
     except Exception as e:

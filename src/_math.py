@@ -2,6 +2,7 @@
 Math Utilities for ncviewer
 """
 import numpy as np
+import re
 
 def evaluate_expression(ds, expression):
     """Evaluate a mathematical expression using dataset variables.
@@ -17,7 +18,6 @@ def evaluate_expression(ds, expression):
         KeyError: If a variable in the expression doesn't exist
         SyntaxError: If the expression is invalid
     """
-    import re
     
     # Strip whitespace
     expression = expression.strip()
@@ -59,9 +59,11 @@ def evaluate_expression(ds, expression):
     except Exception as e:
         raise SyntaxError(f"Invalid expression '{expression}': {e}")
 
-def compute_error(var_a, var_b, cell_volume, norm='2'):
+def compute_error(var_a, var_b, cell_volume, norm):
     """
     Compute error between two variables using specified norm.
+    var_a and var_b should be numpy arrays of the same shape,
+    and cell_volume should be a numpy array of the same shape for weighting.
     
     Args:
         var_a: First variable (numpy array)
