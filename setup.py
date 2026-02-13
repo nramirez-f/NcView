@@ -7,13 +7,16 @@ setup(
     author="nramirez-f",
     packages=find_packages(),
     install_requires=[
-        "xarray",
+        "setuptools",
         "netCDF4",
+        "xarray",
+        "dask",
         "matplotlib",
         "hvplot",
         "bokeh",
         "holoviews",
         "panel",
+        "scipy",
     ],
     entry_points={
         "console_scripts": [
